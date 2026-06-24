@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>设计作品集 · Design Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter','Noto Serif SC',system-ui,-apple-system,sans-serif;
+  background:#faf8f5;color:#1a1a1a;line-height:1.6;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+img{display:block;max-width:100%;height:auto}
+a{text-decoration:none;color:inherit}
+
+/* ===== UTILITY ===== */
+.container{max-width:1360px;margin:0 auto;padding:0 40px}
+@media(max-width:768px){.container{padding:0 24px}}
+
+.section{padding:120px 0}
+.section-label{
+  font-size:11px;text-transform:uppercase;letter-spacing:4px;color:#a0a0a0;
+  margin-bottom:16px}
+.section-title{
+  font-size:clamp(28px,4vw,48px);font-weight:600;letter-spacing:-0.02em;
+  margin-bottom:20px;line-height:1.15}
+.section-desc{
+  font-size:16px;color:#6b6b6b;max-width:520px;line-height:1.7}
+
+/* ===== LOADING ===== */
+#loader{
+  position:fixed;inset:0;z-index:9999;background:#faf8f5;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  transition:opacity 0.8s ease,visibility 0.8s ease}
+#loader.hidden{opacity:0;visibility:hidden}
+#loader-inner{width:32px;height:32px;border:2px solid #e0dcd5;border-top-color:#c9a06c;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== NAVIGATION ===== */
+nav{
+  position:fixed;top:0;left:0;width:100%;z-index:1000;
+  padding:24px 0;transition:all 0.4s ease}
+nav.scrolled{background:rgba(250,248,245,0.92);backdrop-filter:blur(16px);padding:14px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+nav .container{display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-size:18px;font-weight:600;letter-spacing:-0.3px}
+.nav-logo span{color:#c9a06c}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{font-size:13px;color:#6b6b6b;transition:color 0.3s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:#c9a06c;transition:width 0.3s}
+.nav-links a:hover{color:#1a1a1a}
+.nav-links a:hover::after{width:100%}
+.nav-toggle{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px}
+.nav-toggle span{display:block;width:24px;height:1.5px;background:#1a1a1a;transition:all 0.3s}
+
+/* ===== HERO ===== */
+.hero{
+  min-height:100vh;display:flex;align-items:center;
+  padding:160px 0 100px;position:relative;overflow:hidden}
+.hero::before{
+  content:'';position:absolute;top:-30%;right:-10%;width:600px;height:600px;
+  background:radial-gradient(circle,rgba(201,160,108,0.06) 0%,transparent 70%);
+  pointer-events:none}
+.hero-sub{
+  font-size:12px;text-transform:uppercase;letter-spacing:5px;color:#b0a898;
+  margin-bottom:24px}
+.hero-title{
+  font-size:clamp(36px,6vw,76px);font-weight:600;letter-spacing:-0.03em;
+  line-height:1.08;margin-bottom:28px;max-width:900px}
+.hero-title span{color:#c9a06c}
+.hero-desc{
+  font-size:17px;color:#6b6b6b;max-width:580px;line-height:1.7;
+  margin-bottom:44px}
+.hero-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:16px 36px;background:#1a1a1a;color:#fff;
+  font-size:13px;font-weight:500;letter-spacing:1px;text-transform:uppercase;
+  border-radius:100px;transition:all 0.4s;border:none}
+.hero-cta:hover{background:#c9a06c;transform:translateY(-2px)}
+.hero-scroll{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#c0b8a8;
+  animation:fadeUp 2s ease infinite}
+.hero-scroll .line{width:1px;height:40px;background:#c0b8a8}
+
+/* ===== FILTER BAR ===== */
+.filter-bar{
+  display:flex;flex-wrap:wrap;gap:8px;margin-bottom:56px;
+  border-bottom:1px solid #e8e4de;padding-bottom:20px}
+.filter-btn{
+  padding:8px 20px;font-size:12px;letter-spacing:1px;
+  background:transparent;border:1px solid #e0dcd5;border-radius:100px;
+  cursor:pointer;transition:all 0.3s;color:#6b6b6b;font-family:inherit}
+.filter-btn:hover{border-color:#c9a06c;color:#1a1a1a}
+.filter-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+
+/* ===== WORK CARDS GRID ===== */
+.work-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:32px}
+.work-card{
+  position:relative;border-radius:20px;overflow:hidden;
+  background:#fff;cursor:pointer;transition:all 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+  box-shadow:0 1px 3px rgba(0,0,0,0.02)}
+.work-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.06)}
+.work-card-image{
+  width:100%;aspect-ratio:4/3;object-fit:cover;
+  transition:transform 0.8s ease,filter 0.8s ease}
+.work-card:hover .work-card-image{transform:scale(1.03)}
+.work-card-info{
+  padding:20px 24px 24px;
+  background:linear-gradient(to top,rgba(255,255,255,0.98),#fff)}
+.work-card-category{
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#c9a06c;
+  margin-bottom:6px}
+.work-card-title{
+  font-size:14px;font-weight:500;color:#1a1a1a;line-height:1.4}
+
+/* ===== ABOUT ===== */
+.about-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.about-visual{
+  aspect-ratio:1;border-radius:24px;overflow:hidden;background:#eae6df;
+  display:flex;align-items:center;justify-content:center;
+  font-size:80px;color:#c9a06c}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px}
+.stat-item{text-align:center}
+.stat-num{font-size:36px;font-weight:600;letter-spacing:-0.02em}
+.stat-label{font-size:11px;color:#a0a0a0;letter-spacing:1px;margin-top:4px}
+
+/* ===== DARK SECTION ===== */
+.section-dark{
+  background:#1a1a1a;color:#f0eee9}
+.section-dark .section-desc{color:#9a9a9a}
+.section-dark .section-label{color:#6a6a6a}
+
+/* ===== LIGHTBOX ===== */
+.lightbox{
+  position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.92);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;visibility:hidden;transition:all 0.4s ease;
+  backdrop-filter:blur(8px)}
+.lightbox.active{opacity:1;visibility:hidden}
+.lightbox.active{opacity:1;visibility:visible}
+.lightbox-img{
+  max-width:85vw;max-height:85vh;border-radius:12px;
+  box-shadow:0 30px 80px rgba(0,0,0,0.5);transform:scale(0.9);
+  transition:transform 0.4s ease}
+.lightbox.active .lightbox-img{transform:scale(1)}
+.lightbox-close{
+  position:absolute;top:30px;right:40px;
+  width:44px;height:44px;background:rgba(255,255,255,0.08);
+  border:none;border-radius:50%;color:#fff;font-size:20px;
+  cursor:pointer;transition:background 0.3s;display:flex;align-items:center;justify-content:center}
+.lightbox-close:hover{background:rgba(255,255,255,0.15)}
+.lightbox-nav{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.08);
+  border:none;color:#fff;font-size:18px;cursor:pointer;
+  transition:background 0.3s;display:flex;align-items:center;justify-content:center}
+.lightbox-nav:hover{background:rgba(255,255,255,0.15)}
+.lightbox-prev{left:30px}
+.lightbox-next{right:30px}
+.lightbox-caption{
+  position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+  color:rgba(255,255,255,0.7);font-size:13px;letter-spacing:0.5px}
+
+/* ===== CONTACT ===== */
+.contact-card{
+  background:#fff;border-radius:24px;padding:64px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.03);
+  display:grid;grid-template-columns:1fr 1fr;gap:60px}
+.contact-info h3{font-size:24px;font-weight:600;margin-bottom:16px}
+.contact-info p{color:#6b6b6b;font-size:14px;line-height:1.8}
+.contact-info .item{margin-top:20px}
+.contact-info .item strong{display:block;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#c9a06c;margin-bottom:4px}
+.contact-info .item span{font-size:15px;color:#1a1a1a}
+
+/* ===== FOOTER ===== */
+footer{
+  padding:40px 0;border-top:1px solid #e8e4de;margin-top:40px}
+footer .container{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#a0a0a0}
+.social-links{display:flex;gap:20px}
+.social-links a{color:#a0a0a0;transition:color 0.3s}
+.social-links a:hover{color:#c9a06c}
+
+/* ===== REVEAL ANIMATIONS ===== */
+.reveal{opacity:0;transform:translateY(30px);transition:all 0.8s cubic-bezier(0.25,0.46,0.45,0.94)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1024px){
+  .about-grid{grid-template-columns:1fr;gap:48px}
+  .contact-card{grid-template-columns:1fr;gap:32px;padding:40px}
+}
+@media(max-width:768px){
+  .section{padding:80px 0}
+  .nav-links{display:none}
+  .nav-toggle{display:flex}
+  .nav-links.open{display:flex;position:fixed;top:0;left:0;width:100%;height:100vh;
+    background:rgba(250,248,245,0.98);flex-direction:column;align-items:center;
+    justify-content:center;gap:28px;font-size:16px;z-index:-1}
+  .hero-title{font-size:clamp(28px,10vw,44px)}
+  .work-grid{grid-template-columns:1fr;gap:24px}
+  .stats{grid-template-columns:repeat(3,1fr);gap:12px}
+  .stat-num{font-size:28px}
+  .lightbox-img{max-width:92vw;max-height:70vh}
+  .lightbox-prev{left:12px;width:36px;height:36px;font-size:14px}
+  .lightbox-next{right:12px;width:36px;height:36px;font-size:14px}
+  footer .container{flex-direction:column;gap:12px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader"><div id="loader-inner"></div></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="container">
+    <a href="#" class="nav-logo">Portfolio<span>.</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#works" data-nav>作品</a></li>
+      <li><a href="#about" data-nav>关于</a></li>
+      <li><a href="#contact" data-nav>联系</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="container">
+    <div class="hero-sub">设计作品集 · 2026</div>
+    <h1 class="hero-title">
+      视觉设计<br><span>创造价值</span>
+    </h1>
+    <p class="hero-desc">
+      涵盖品牌标识、产品设计、海报视觉、数据图表与数字界面<br>
+      以克制的美学语言，传递精准的设计表达。
+    </p>
+    <a href="#works" class="hero-cta">浏览作品</a>
+  </div>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="line"></div>
+  </div>
+</section>
+
+<!-- WORKS -->
+<section class="section" id="works">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Works</div>
+      <h2 class="section-title">精选作品</h2>
+      <p class="section-desc" style="margin-bottom:48px">品牌 · 产品 · 视觉 · 图表 · 数字界面</p>
+    </div>
+    <div class="filter-bar reveal">
+      <button class="filter-btn active" data-filter="all">全部</button>
+      <button class="filter-btn" data-filter="logo">品牌标识</button>
+      <button class="filter-btn" data-filter="product">产品设计</button>
+      <button class="filter-btn" data-filter="poster">海报设计</button>
+      <button class="filter-btn" data-filter="chart">图表设计</button>
+      <button class="filter-btn" data-filter="web">网页/程序</button>
+    </div>
+    <div class="work-grid reveal" id="workGrid"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section section-dark" id="about">
+  <div class="container">
+    <div class="about-grid reveal">
+      <div class="about-visual">✦</div>
+      <div>
+        <div class="section-label" style="color:#6a6a6a">About</div>
+        <h2 class="section-title" style="color:#f0eee9">以设计<br>连接商业与美学</h2>
+        <p class="section-desc" style="margin-top:20px">
+          专注于视觉传达与品牌体验设计，擅长从传统文化与当代审美中提取设计语言。
+          作品涵盖品牌系统、产品包装、数字界面与信息可视化等多个领域。
+        </p>
+        <div class="stats">
+          <div class="stat-item"><div class="stat-num" style="color:#fff">50+</div><div class="stat-label">设计作品</div></div>
+          <div class="stat-item"><div class="stat-num" style="color:#fff">5+</div><div class="stat-label">设计领域</div></div>
+          <div class="stat-item"><div class="stat-num" style="color:#fff">3+</div><div class="stat-label">年经验</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section" id="contact">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Contact</div>
+      <h2 class="section-title">联系我</h2>
+    </div>
+    <div class="contact-card reveal" style="margin-top:48px">
+      <div class="contact-info">
+        <h3>期待合作</h3>
+        <p>如果您对我的作品感兴趣，或有意向合作，欢迎通过以下方式联系。</p>
+        <div class="item">
+          <strong>Email</strong>
+          <span>designer@example.com</span>
+        </div>
+        <div class="item">
+          <strong>WeChat</strong>
+          <span>design_portfolio</span>
+        </div>
+        <div class="item">
+          <strong>Location</strong>
+          <span>中国 · 上海</span>
+        </div>
+      </div>
+      <div style="background:#f5f3ef;border-radius:16px;display:flex;align-items:center;justify-content:center;min-height:240px;color:#c9a06c;font-size:48px">✉</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <span>© 2026 Design Portfolio. All rights reserved.</span>
+    <div class="social-links">
+      <a href="#" aria-label="Behance">Be</a>
+      <a href="#" aria-label="Dribbble">Dr</a>
+      <a href="#" aria-label="WeChat">We</a>
+    </div>
+  </div>
+</footer>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lbClose">✕</button>
+  <button class="lightbox-nav lightbox-prev" id="lbPrev">‹</button>
+  <button class="lightbox-nav lightbox-next" id="lbNext">›</button>
+  <img class="lightbox-img" id="lbImg" src="" alt="">
+  <div class="lightbox-caption" id="lbCaption"></div>
+</div>
+
+<script>
+// ===== DATA =====
+const WORKS = [
+  // ---- Logo ----
+  ...['logo设计/屏幕截图 2026-06-24 173317.png','logo设计/微信图片_20231112231502.jpg','logo设计/微信图片_20250219134757.png','logo设计/河豚logo1.png'].map((f,i)=>(
+    {src:f,cat:'logo',title:['品牌标识 — 极简符号','品牌标识 — 字体设计','品牌标识 — 徽章设计','品牌标识 — 河豚形象'][i]}
+  )),
+  // ---- Product ----
+  ...['产品设计/国风系列/梅.png','产品设计/国风系列/兰.png','产品设计/国风系列/竹.png','产品设计/国风系列/菊.png'].map((f,i)=>(
+    {src:f,cat:'product',title:'国风系列 — '+['梅','兰','竹','菊'][i]}
+  )),
+  ...['产品设计/敦煌系列/丝路.png','产品设计/敦煌系列/九色鹿.png','产品设计/敦煌系列/九色鹿（红）.png','产品设计/敦煌系列/敦煌纹样.png','产品设计/敦煌系列/瓷器 (2) 拷贝.png'].map((f,i)=>(
+    {src:f,cat:'product',title:'敦煌系列 — '+['丝路','九色鹿','九色鹿·红','敦煌纹样','瓷器'][i]}
+  )),
+  ...['产品设计/艺术家系列/Alia1.png','产品设计/艺术家系列/Alia2.png','产品设计/艺术家系列/Alia3.png','产品设计/艺术家系列/Alia4.png'].map((f,i)=>(
+    {src:f,cat:'product',title:'艺术家系列 — Alia '+(i+1)}
+  )),
+  ...['产品设计/艺术家系列/Alia1纹样.png','产品设计/艺术家系列/Alia2纹样.png','产品设计/艺术家系列/Alia3纹样.png','产品设计/艺术家系列/Alia4纹样.png'].map((f,i)=>(
+    {src:f,cat:'product',title:'Alia 纹样设计 '+(i+1)}
+  )),
+  ...['产品设计/艺术家系列/noritake1.png','产品设计/艺术家系列/noritake2.png','产品设计/艺术家系列/noritake3.png'].map((f,i)=>(
+    {src:f,cat:'product',title:'Noritake 系列 '+(i+1)}
+  )),
+  ...['产品设计/艺术家系列/noritake1纹样.png','产品设计/艺术家系列/noritake2纹样.png','产品设计/艺术家系列/noritake3纹样.png'].map((f,i)=>(
+    {src:f,cat:'product',title:'Noritake 纹样 '+(i+1)}
+  )),
+  // ---- Poster ----
+  {src:'海报设计/3.9待改(1)_01.jpg',cat:'poster',title:'海报设计 — 数字沙龙'},
+  {src:'海报设计/数字沙龙5.jpg',cat:'poster',title:'海报设计 — 活动视觉'},
+  // ---- Chart ----
+  {src:'图表设计合集/图片1(1).png',cat:'chart',title:'信息图表 — 数据可视化'},
+  {src:'图表设计合集/抵押难2.png',cat:'chart',title:'信息图表 — 金融分析'},
+  {src:'图表设计合集/搭建绿金服务平台.png',cat:'chart',title:'信息图表 — 绿金平台'},
+  {src:'图表设计合集/数据共享平台_03.png',cat:'chart',title:'信息图表 — 数据共享'},
+  ...['公式_01.png','公式_01 - 副本.png','图片2_20241009132126_01.png','碳汇流程.png'].map((f,i)=>(
+    {src:'图表设计合集/金融创新图表/'+f,cat:'chart',title:'金融创新图表 '+(i+1)}
+  )),
+  // ---- Web ----
+  ...['1.26美化整合版_16.png','1.26美化整合版_17.png','1.26美化整合版_18.png','1.26美化整合版_19.png','1.26美化整合版_20.png'].map((f,i)=>(
+    {src:'网页和程序设计/'+f,cat:'web',title:'界面设计 — 页面 '+(i+1)}
+  )),
+  {src:'网页和程序设计/图片1(2).png',cat:'web',title:'界面设计 — 移动端'},
+  {src:'网页和程序设计/官网页面.jpg',cat:'web',title:'界面设计 — 官网'},
+  // ---- Data Platform ----
+  {src:'图表设计合集/数据共享平台_03.png',cat:'chart',title:'数据共享平台界面'}
+];
+
+// ===== RENDER =====
+const grid = document.getElementById('workGrid');
+let currentFilter = 'all';
+
+function renderWorks(filter){
+  const items = filter==='all' ? WORKS : WORKS.filter(w=>w.cat===filter);
+  grid.innerHTML = items.map((w,i)=>`
+    <div class="work-card" data-index="${WORKS.indexOf(w)}" data-filter="${w.cat}" style="animation-delay:${i*0.04}s">
+      <img class="work-card-image" src="${w.src}" alt="${w.title}" loading="lazy" onerror="this.parentElement.style.display='none'">
+      <div class="work-card-info">
+        <div class="work-card-category">${catLabel(w.cat)}</div>
+        <div class="work-card-title">${w.title}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function catLabel(c){
+  return {logo:'品牌标识',product:'产品设计',poster:'海报设计',chart:'图表设计',web:'网页设计'}[c]||c;
+}
+
+renderWorks('all');
+
+// ===== FILTER =====
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelector('.filter-btn.active').classList.remove('active');
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderWorks(currentFilter);
+  });
+});
+
+// ===== LIGHTBOX =====
+const lb = document.getElementById('lightbox');
+const lbImg = document.getElementById('lbImg');
+const lbCaption = document.getElementById('lbCaption');
+const lbClose = document.getElementById('lbClose');
+const lbPrev = document.getElementById('lbPrev');
+const lbNext = document.getElementById('lbNext');
+let lbIndex = -1;
+
+let filteredIndices = [];
+
+function openLightbox(index){
+  filteredIndices = WORKS.map((_,i)=>i);
+  lbIndex = filteredIndices.indexOf(index);
+  if(lbIndex===-1)return;
+  showLightboxItem();
+  lb.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function showLightboxItem(){
+  const i = filteredIndices[lbIndex];
+  const w = WORKS[i];
+  lbImg.src = w.src;
+  lbCaption.textContent = w.title + ' — ' + catLabel(w.cat);
+}
+
+grid.addEventListener('click',e=>{
+  const card = e.target.closest('.work-card');
+  if(card) openLightbox(parseInt(card.dataset.index));
+});
+
+lbClose.addEventListener('click',()=>{
+  lb.classList.remove('active');
+  document.body.style.overflow = '';
+});
+
+document.addEventListener('keydown',e=>{
+  if(!lb.classList.contains('active'))return;
+  if(e.key==='Escape')lbClose.click();
+  if(e.key==='ArrowLeft')lbPrev.click();
+  if(e.key==='ArrowRight')lbNext.click();
+});
+
+lbPrev.addEventListener('click',()=>{
+  const filtered = WORKS.map((_,i)=>i);
+  let idx = filtered.indexOf(WORKS[filteredIndices[lbIndex]]?WORKS.indexOf(WORKS[filteredIndices[lbIndex]]):0);
+  // simpler: just navigate within current visible set
+  lbIndex = (lbIndex-1+filteredIndices.length)%filteredIndices.length;
+  showLightboxItem();
+});
+
+lbNext.addEventListener('click',()=>{
+  lbIndex = (lbIndex+1)%filteredIndices.length;
+  showLightboxItem();
+});
+
+lb.addEventListener('click',e=>{
+  if(e.target===lb)lbClose.click();
+});
+
+// ===== SCROLL NAV =====
+const nav = document.getElementById('nav');
+window.addEventListener('scroll',()=>{
+  nav.classList.toggle('scrolled',window.scrollY>80);
+});
+
+// ===== MOBILE NAV =====
+document.getElementById('navToggle').addEventListener('click',()=>{
+  document.getElementById('navLinks').classList.toggle('open');
+});
+document.querySelectorAll('[data-nav]').forEach(a=>{
+  a.addEventListener('click',()=>{
+    document.getElementById('navLinks').classList.remove('open');
+  });
+});
+
+// ===== REVEAL ON SCROLL =====
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}});
+},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// ===== LOADER =====
+window.addEventListener('load',()=>{
+  setTimeout(()=>document.getElementById('loader').classList.add('hidden'),300);
+});
+</script>
+</body>
+</html>
