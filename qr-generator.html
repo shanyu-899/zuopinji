@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code — Design Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:#faf8f5;color:#1a1a1a;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+}
+.container{
+  max-width:480px;width:100%;margin:40px 20px;
+  background:#fff;border-radius:24px;padding:48px 40px 40px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.02),0 20px 60px rgba(0,0,0,0.04);
+}
+h1{font-size:20px;font-weight:600;letter-spacing:-0.3px;margin-bottom:4px}
+h1 span{color:#c9a06c}
+.sub{font-size:12px;color:#a0a0a0;letter-spacing:0.3px;margin-bottom:32px}
+
+/* URL Input */
+.input-group{display:flex;gap:8px;margin-bottom:32px}
+.input-group input{
+  flex:1;padding:12px 16px;border:1.5px solid #e8e4de;border-radius:12px;
+  font-size:14px;font-family:inherit;color:#1a1a1a;background:#faf8f5;
+  outline:none;transition:border-color 0.3s}
+.input-group input:focus{border-color:#c9a06c;background:#fff}
+.input-group input::placeholder{color:#c0b8a8}
+.input-group button{
+  padding:12px 24px;background:#1a1a1a;color:#fff;border:none;border-radius:12px;
+  font-size:13px;font-weight:500;cursor:pointer;transition:all 0.3s;font-family:inherit}
+.input-group button:hover{background:#c9a06c}
+
+/* QR Display */
+.qr-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  padding:36px;border:1.5px dashed #e8e4de;border-radius:20px;
+  background:#faf8f5;position:relative;min-height:260px;justify-content:center}
+#qrcode{padding:16px;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.04)}
+#qrcode img,#qrcode canvas{display:block;margin:0 auto}
+.qr-hint{font-size:11px;color:#c0b8a8;margin-top:12px;letter-spacing:0.5px}
+.qr-placeholder{
+  color:#c0b8a8;font-size:13px;text-align:center;line-height:1.6}
+
+/* Download */
+.download-row{display:flex;gap:8px;margin-top:24px;justify-content:center}
+.dl-btn{
+  padding:10px 28px;border:1.5px solid #e8e4de;border-radius:100px;
+  background:transparent;color:#6b6b6b;font-size:12px;font-weight:500;
+  cursor:pointer;transition:all 0.3s;font-family:inherit;
+  display:inline-flex;align-items:center;gap:6px}
+.dl-btn:hover{border-color:#c9a06c;color:#1a1a1a}
+.dl-btn.primary{background:#1a1a1a;border-color:#1a1a1a;color:#fff}
+.dl-btn.primary:hover{background:#c9a06c;border-color:#c9a06c}
+
+/* Preview note */
+.note{
+  margin-top:24px;padding:14px 18px;
+  background:#f8f6f2;border-radius:12px;font-size:11px;color:#8a8a8a;line-height:1.7}
+
+/* Tip section */
+.tip-box{
+  margin-top:24px;padding:16px 20px;
+  border:1px solid #ede9e3;border-radius:14px;
+  background:linear-gradient(135deg,#faf8f5,#f5f2ec)}
+.tip-box h3{font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#c9a06c;margin-bottom:10px}
+.tip-box p{font-size:12px;color:#7a7a7a;line-height:1.8}
+.tip-box code{background:#ede9e3;padding:2px 8px;border-radius:4px;font-size:11px;color:#1a1a1a}
+
+.footer{
+  text-align:center;margin-top:32px;font-size:11px;color:#c0b8a8;letter-spacing:0.5px}
+.footer a{color:#c9a06c;text-decoration:none}
+
+/* Responsive */
+@media(max-width:480px){
+  .container{padding:28px 20px 24px;margin:20px 12px}
+  .qr-wrap{padding:24px 16px}
+  .input-group{flex-direction:column}
+  .download-row{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>QR Code <span>Generator</span></h1>
+  <p class="sub">生成专属二维码 · 用于简历 / 名片 · 匹配作品集风格</p>
+
+  <div class="input-group">
+    <input type="text" id="urlInput" placeholder="https://" value="https://your-portfolio.github.io">
+    <button id="generateBtn">生成</button>
+  </div>
+
+  <div class="qr-wrap" id="qrWrap">
+    <div id="qrcode"></div>
+    <div class="qr-hint">Scan to view portfolio</div>
+  </div>
+
+  <div class="download-row">
+    <button class="dl-btn primary" id="downloadPng">↓ 下载 PNG</button>
+    <button class="dl-btn" id="downloadSvg">↓ 下载 SVG</button>
+  </div>
+
+  <div class="note">
+    <strong>提示：</strong>点击「下载 PNG」可保存为 300 DPI 高清图片，适合打印在简历上。
+    下载 SVG 可无损放大，用于印刷品。
+  </div>
+
+  <div class="tip-box">
+    <h3>部署指南</h3>
+    <p>
+      ① 在 <a href="https://github.com/new" target="_blank" style="color:#c9a06c">github.com/new</a> 创建新仓库<br>
+      ② 把作品集文件拖拽上传到仓库<br>
+      ③ 进入 Settings → Pages → 选 main 分支 → Save<br>
+      ④ 把生成的网址粘贴到上方输入框 → 重新生成二维码 → 下载 PNG
+    </p>
+  </div>
+
+  <div class="footer">
+    <a href="index.html">← 返回作品集</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  const urlInput = document.getElementById('urlInput');
+  const generateBtn = document.getElementById('generateBtn');
+  const qrContainer = document.getElementById('qrcode');
+  const downloadPng = document.getElementById('downloadPng');
+  const downloadSvg = document.getElementById('downloadSvg');
+  const qrWrap = document.getElementById('qrWrap');
+
+  let currentQR = null;
+  let currentUrl = '';
+
+  // Color config matching portfolio
+  const COLORS = {
+    dark: '#1a1a1a',
+    gold: '#c9a06c',
+    white: '#ffffff',
+    bg: '#faf8f5',
+  };
+
+  function generateQR(url) {
+    if (!url || url === currentUrl) return;
+    currentUrl = url;
+    qrContainer.innerHTML = '';
+
+    try {
+      currentQR = new QRCode(qrContainer, {
+        text: url,
+        width: 180,
+        height: 180,
+        colorDark: COLORS.gold,
+        colorLight: COLORS.white,
+        correctLevel: QRCode.CorrectLevel.H,
+      });
+      currentUrl = url;
+    } catch(e) {
+      qrContainer.innerHTML = '<div class="qr-placeholder">请输入有效的网址</div>';
+      currentQR = null;
+    }
+  }
+
+  // Initial generation
+  function initQR() {
+    const val = urlInput.value.trim();
+    if (val) {
+      generateQR(val);
+    } else {
+      generateQR('https://your-portfolio.github.io');
+      urlInput.value = 'https://your-portfolio.github.io';
+    }
+  }
+
+  // Generate on click
+  generateBtn.addEventListener('click', () => {
+    const val = urlInput.value.trim();
+    if (!val) return;
+    generateQR(val);
+  });
+
+  // Generate on Enter
+  urlInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') generateBtn.click();
+  });
+
+  // ===== DOWNLOAD PNG (with print-quality upscale) =====
+  downloadPng.addEventListener('click', () => {
+    const canvas = qrContainer.querySelector('canvas');
+    if (!canvas) return;
+
+    const url = currentUrl || urlInput.value.trim() || 'portfolio';
+    const filename = url.replace(/https?:\/\//, '').replace(/[\/\?#]/g, '_').slice(0,40) || 'portfolio';
+
+    // High-res canvas for print
+    const PRINT_SCALE = 4;
+    const SIZE = 180 * PRINT_SCALE;
+    const PADDING = 40 * PRINT_SCALE;
+    const TOTAL = SIZE + PADDING * 2;
+
+    const c = document.createElement('canvas');
+    c.width = TOTAL;
+    c.height = TOTAL + 80 * PRINT_SCALE;  // extra space for label
+    const ctx = c.getContext('2d');
+
+    // White background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, c.width, c.height);
+
+    // QR at center
+    const padding = 20 * PRINT_SCALE;
+    ctx.drawImage(canvas, PADDING - padding, PADDING - padding, SIZE + padding * 2, SIZE + padding * 2);
+
+    // Thin border
+    ctx.strokeStyle = '#e8e4de';
+    ctx.lineWidth = 2 * PRINT_SCALE;
+    ctx.roundRect(24 * PRINT_SCALE, 24 * PRINT_SCALE, TOTAL - 48 * PRINT_SCALE, TOTAL - 48 * PRINT_SCALE, 20 * PRINT_SCALE);
+    ctx.stroke();
+
+    // "SCAN ME" label
+    ctx.fillStyle = '#c9a06c';
+    ctx.font = `600 ${22 * PRINT_SCALE}px Inter, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText('SCAN ME', TOTAL / 2, TOTAL + 24 * PRINT_SCALE);
+
+    // URL below
+    ctx.fillStyle = '#a0a0a0';
+    ctx.font = `${10 * PRINT_SCALE}px Inter, sans-serif`;
+    ctx.fillText(url, TOTAL / 2, TOTAL + 52 * PRINT_SCALE);
+
+    // Download
+    const link = document.createElement('a');
+    link.download = `qr-${filename}.png`;
+    link.href = c.toDataURL('image/png');
+    link.click();
+  });
+
+  // ===== DOWNLOAD SVG =====
+  downloadSvg.addEventListener('click', () => {
+    const url = currentUrl || urlInput.value.trim() || 'portfolio';
+    const filename = url.replace(/https?:\/\//, '').replace(/[\/\?#]/g, '_').slice(0,40) || 'portfolio';
+
+    // Get QR modules from the canvas
+    const canvas = qrContainer.querySelector('canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    const imageData = ctx.getImageData(0, 0, w, h).data;
+
+    // Detect module size by finding first dark pixel
+    let moduleSize = 0;
+    let firstDarkX = -1;
+    for (let x = 0; x < w; x++) {
+      const idx = (x * 4 + 3);
+      if (imageData[idx] > 128) {
+        if (firstDarkX === -1) firstDarkX = x;
+      } else if (firstDarkX !== -1) {
+        moduleSize = x - firstDarkX;
+        break;
+      }
+    }
+    if (moduleSize === 0) moduleSize = w / 21;
+
+    const modules = Math.round(w / moduleSize);
+    const grid = [];
+    for (let row = 0; row < modules; row++) {
+      grid[row] = [];
+      for (let col = 0; col < modules; col++) {
+        const cx = Math.floor(col * moduleSize + moduleSize/2);
+        const cy = Math.floor(row * moduleSize + moduleSize/2);
+        const idx = (cy * w + cx) * 4;
+        // Check alpha channel (the QR uses alpha to mask modules)
+        grid[row][col] = imageData[idx + 3] > 128;
+      }
+    }
+
+    const SVG_SIZE = 400;
+    const mod = SVG_SIZE / modules;
+
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SVG_SIZE} ${SVG_SIZE}" width="${SVG_SIZE}" height="${SVG_SIZE}">`;
+    svg += `<rect width="${SVG_SIZE}" height="${SVG_SIZE}" fill="#ffffff" rx="${SVG_SIZE * 0.04}"/>`;
+
+    // Draw modules with rounded corners
+    const radius = Math.max(mod * 0.22, 0.5);
+    for (let row = 0; row < modules; row++) {
+      for (let col = 0; col < modules; col++) {
+        if (grid[row][col]) {
+          const x = col * mod;
+          const y = row * mod;
+          svg += `<rect x="${x}" y="${y}" width="${mod}" height="${mod}" rx="${radius}" fill="#c9a06c"/>`;
+        }
+      }
+    }
+
+    svg += '</svg>';
+
+    const blob = new Blob([svg], { type: 'image/svg+xml' });
+    const link = document.createElement('a');
+    link.download = `qr-${filename}.svg`;
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    URL.revokeObjectURL(link.href);
+  });
+
+  // Init
+  initQR();
+
+})();
+</script>
+</body>
+</html>
