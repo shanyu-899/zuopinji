@@ -6,6 +6,7 @@
 <title>设计作品集 · Design Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 /* ===== RESET & BASE ===== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -299,6 +300,31 @@ footer .container{display:flex;justify-content:space-between;align-items:center;
   </div>
 </section>
 
+<!-- QR FOR RESUME -->
+<section class="section" id="qr-resume" style="padding:80px 0">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <div class="section-label">QR Code</div>
+      <h2 class="section-title" style="margin-bottom:12px">简历二维码</h2>
+      <p class="section-desc" style="margin:0 auto 40px">
+        扫描即可访问在线作品集，适合贴在简历或名片上
+      </p>
+    </div>
+    <div class="reveal" id="qrSection" style="display:flex;flex-direction:column;align-items:center;gap:24px">
+      <div id="qrDisplay" style="background:#fff;padding:24px;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,0.06);display:inline-block">
+        <div id="qrcode-resume"></div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <button onclick="downloadQR()" class="hero-cta" style="font-size:11px;padding:12px 28px;border:none;cursor:pointer;font-family:inherit">下载 QR PNG (高清)</button>
+        <a href="qr-generator.html" class="hero-cta" style="font-size:11px;padding:12px 28px;background:transparent;color:#1a1a1a;border:1.5px solid #e0dcd5">自定义二维码</a>
+      </div>
+      <div style="font-size:12px;color:#a0a0a0">
+        <span style="color:#c9a06c">https://shanyu-899.github.io/zuopinji/</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- CONTACT -->
 <section class="section" id="contact">
   <div class="container">
@@ -311,16 +337,20 @@ footer .container{display:flex;justify-content:space-between;align-items:center;
         <h3>期待合作</h3>
         <p>如果您对我的作品感兴趣，或有意向合作，欢迎通过以下方式联系。</p>
         <div class="item">
-          <strong>Email</strong>
-          <span>designer@example.com</span>
+          <strong>电话</strong>
+          <span>13666775103</span>
         </div>
         <div class="item">
-          <strong>WeChat</strong>
-          <span>design_portfolio</span>
+          <strong>邮箱</strong>
+          <span>78905406@qq.com</span>
         </div>
         <div class="item">
-          <strong>Location</strong>
-          <span>中国 · 上海</span>
+          <strong>微信</strong>
+          <span>haimianbaoabo1215000</span>
+        </div>
+        <div class="item">
+          <strong>城市</strong>
+          <span>中国 · 宁波</span>
         </div>
       </div>
       <div style="background:#f5f3ef;border-radius:16px;display:flex;align-items:center;justify-content:center;min-height:240px;color:#c9a06c;font-size:48px">✉</div>
@@ -378,6 +408,7 @@ const WORKS = [
   // ---- Poster ----
   {src:'海报设计/3.9待改(1)_01.jpg',cat:'poster',title:'海报设计 — 数字沙龙'},
   {src:'海报设计/数字沙龙5.jpg',cat:'poster',title:'海报设计 — 活动视觉'},
+  {src:'海报设计/S&D商业计划书_01.png',cat:'poster',title:'海报设计 — S&D商业计划书'},
   // ---- Chart ----
   {src:'图表设计合集/图片1(1).png',cat:'chart',title:'信息图表 — 数据可视化'},
   {src:'图表设计合集/抵押难2.png',cat:'chart',title:'信息图表 — 金融分析'},
@@ -516,6 +547,72 @@ document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 window.addEventListener('load',()=>{
   setTimeout(()=>document.getElementById('loader').classList.add('hidden'),300);
 });
+
+// ===== QR CODE FOR RESUME =====
+(function(){
+  const URL = 'https://shanyu-899.github.io/zuopinji/';
+  const container = document.getElementById('qrcode-resume');
+  if (!container) return;
+
+  // Generate QR
+  new QRCode(container, {
+    text: URL,
+    width: 180,
+    height: 180,
+    colorDark: '#c9a06c',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H,
+  });
+
+  // Export as high-res PNG
+  window.downloadQR = function() {
+    const canvas = container.querySelector('canvas');
+    if (!canvas) return;
+
+    const SCALE = 5;
+    const S = 180 * SCALE;
+    const PAD = 50 * SCALE;
+    const TOTAL = S + PAD * 2;
+    const LABEL_H = 100 * SCALE;
+
+    const c = document.createElement('canvas');
+    c.width = TOTAL;
+    c.height = TOTAL + LABEL_H;
+    const ctx = c.getContext('2d');
+
+    // White bg
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, c.width, c.height);
+
+    // Draw border
+    ctx.strokeStyle = '#e8e4de';
+    ctx.lineWidth = 2 * SCALE;
+    ctx.beginPath();
+    ctx.roundRect(15 * SCALE, 15 * SCALE, c.width - 30 * SCALE, c.height - LABEL_H - 30 * SCALE, 20 * SCALE);
+    ctx.stroke();
+
+    // Draw QR
+    const innerPad = 15 * SCALE;
+    ctx.drawImage(canvas, PAD - innerPad, PAD - innerPad, S + innerPad * 2, S + innerPad * 2);
+
+    // SCAN ME
+    ctx.fillStyle = '#c9a06c';
+    ctx.font = `600 ${26 * SCALE}px Inter, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText('SCAN ME', TOTAL / 2, TOTAL + 18 * SCALE);
+
+    // URL
+    ctx.fillStyle = '#a0a0a0';
+    ctx.font = `${12 * SCALE}px Inter, sans-serif`;
+    ctx.fillText(URL, TOTAL / 2, TOTAL + 56 * SCALE);
+
+    const link = document.createElement('a');
+    link.download = 'qr-portfolio.png';
+    link.href = c.toDataURL('image/png');
+    link.click();
+  };
+})();
 </script>
 </body>
 </html>
